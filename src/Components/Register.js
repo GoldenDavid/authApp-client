@@ -1,27 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
+import {useForm} from "react-hook-form"
 import axios from "../Services/axiosInterceptor";
 import { useNavigate, Link } from "react-router-dom";
+import { useMutation } from "react-query";
+import ReactLoading from "react-loading"
 const Register = () => {
   const navigate = useNavigate();
-  const [input, setInput] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const {register,handleSubmit,errors}=useForm()
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-
+  const handleRegister = async (data) => {
     try {
-      const response = await axios.post("api/auth/users/register", input);
+      const response = await axios.post("api/auth/users/register", data);
       if (response.status === 201) {
         alert(response.data.message);
         navigate("/login");
       }
+      return response.json()
     } catch (error) {
       alert(error.response.data.message);
     }
   };
+
+  const {mutate,isLoading,isError} =useMutation(handleRegister)
+  if(isLoading) {
+    return (
+      <ReactLoading type={"spin"} color={"green"} height={200} width={200} ></ReactLoading>
+    )
+  }
+
+  if(isError) {
+    return (
+      <b>SERVER IS ERROR</b>
+    )
+  }
   return (
     <section className="vh-100" style={{ backgroundColor: "#95bfb0" }}>
       <div className="container py-5 h-100">
@@ -39,7 +50,7 @@ const Register = () => {
                 </div>
                 <div className="col-md-6 col-lg-7 d-flex align-items-center">
                   <div className="card-body p-4 p-lg-5 text-black">
-                    <form onSubmit={handleRegister}>
+                    <form onSubmit={handleSubmit(mutate)}>
                       <div className="d-flex align-items-center mb-3 pb-1">
                         <i
                           className="fas fa-cubes fa-2x me-3"
@@ -61,13 +72,7 @@ const Register = () => {
                           type="text"
                           className="form-control form-control-lg"
                           name="name"
-                          value={input.name}
-                          onChange={(e) =>
-                            setInput({
-                              ...input,
-                              [e.target.name]: e.target.value,
-                            })
-                          }
+                          {...register("name")}
                         />
                       </div>
 
@@ -77,13 +82,7 @@ const Register = () => {
                           type="email"
                           className="form-control form-control-lg"
                           name="email"
-                          value={input.email}
-                          onChange={(e) =>
-                            setInput({
-                              ...input,
-                              [e.target.name]: e.target.value,
-                            })
-                          }
+                          {...register("email")}
                         />
                       </div>
                       <div className="form-outline mb-4">
@@ -92,13 +91,7 @@ const Register = () => {
                           type="password"
                           className="form-control form-control-lg"
                           name="password"
-                          value={input.password}
-                          onChange={(e) =>
-                            setInput({
-                              ...input,
-                              [e.target.name]: e.target.value,
-                            })
-                          }
+                          {...register("password")}
                         />
                       </div>
 

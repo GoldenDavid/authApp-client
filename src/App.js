@@ -5,9 +5,10 @@ import Home from "./Pages/Home"
 import ProtectedRoutes from "./Services/ProtectedRoutes";
 import {BrowserRouter,Routes,Route} from "react-router-dom"
 
+
+
 const App = () => {
   return ( 
-  <>
     <BrowserRouter>
       <Routes>
           <Route path="/login" element={<Login/>}/>
@@ -17,7 +18,6 @@ const App = () => {
           </Route>
       </Routes>
     </BrowserRouter>
-  </>
   )
 }
 
