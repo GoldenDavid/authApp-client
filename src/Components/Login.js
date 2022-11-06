@@ -39,11 +39,6 @@ const Login = () => {
     )
   }
 
-  if(isError) {
-    return(
-      <b>SERVER ERROR</b>
-    )
-  }
 
   return (
     <section className="vh-100" style={{ backgroundColor: "#ffdfd3" }}>
