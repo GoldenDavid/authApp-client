@@ -4,9 +4,17 @@ import axios from "../Services/axiosInterceptor";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation } from "react-query";
 import ReactLoading from "react-loading"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
 const Register = () => {
+  const schema=yup.object({
+    name:yup.string().required("Name is required").min(3,"Name must be at least 3 characters"),
+    email:yup.string().email("Invalid email").required("Email is required"),
+    password:yup.string().required("Password is required").matches(/^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/,
+      "Password must contain at least 8 characters, one uppercase, one number and one special case character")
+  })
   const navigate = useNavigate();
-  const {register,handleSubmit,errors}=useForm()
+  const {register,handleSubmit,formState: { errors }}=useForm({resolver:yupResolver(schema)})
 
   const handleRegister = async (data) => {
     try {
@@ -24,13 +32,9 @@ const Register = () => {
   const {mutate,isLoading,isError} =useMutation(handleRegister)
   if(isLoading) {
     return (
-      <ReactLoading type={"spin"} color={"green"} height={200} width={200} ></ReactLoading>
-    )
-  }
-
-  if(isError) {
-    return (
-      <b>SERVER IS ERROR</b>
+      <div className="position-absolute top-50 start-50 translate-middle">
+        <ReactLoading type={"spin"} color={"green"} height={200} width={200}></ReactLoading>
+      </div>
     )
   }
   return (
@@ -74,6 +78,7 @@ const Register = () => {
                           name="name"
                           {...register("name")}
                         />
+                        <p style={{color:"red"}}>{errors.name?.message}</p>
                       </div>
 
                       <div className="form-outline mb-4">
@@ -84,6 +89,8 @@ const Register = () => {
                           name="email"
                           {...register("email")}
                         />
+                        <p style={{color:"red"}}>{errors.email?.message}</p>
+
                       </div>
                       <div className="form-outline mb-4">
                         <input
@@ -93,6 +100,7 @@ const Register = () => {
                           name="password"
                           {...register("password")}
                         />
+                        <p style={{color:"red"}}>{errors.password?.message}</p>
                       </div>
 
                       <div className="pt-1 mb-4">

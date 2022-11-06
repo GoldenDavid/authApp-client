@@ -4,8 +4,15 @@ import axios from "../Services/axiosInterceptor";
 import { useNavigate, Link } from "react-router-dom";
 import {useMutation } from "react-query";
 import ReactLoading from "react-loading"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
+
+const schema=yup.object({
+  email: yup.string().email("Invalid email adress").max(255).required("Email is required"),
+  password:yup.string().max(255).required('Password is required')
+})
 const Login = () => {
-  const {register,formState: { errors },handleSubmit}=useForm()
+  const {register,formState: { errors },handleSubmit}=useForm({resolver:yupResolver(schema)})
   const navigate = useNavigate();
   const handleLogin = async (data) => {
     try {
@@ -26,15 +33,12 @@ const Login = () => {
   const {mutate,isLoading,isError}=useMutation(handleLogin)
   if(isLoading) {
     return (
-      <ReactLoading type={"bars"} color={"green"} height={200} width={200} ></ReactLoading>
+      <div className="position-absolute top-50 start-50 translate-middle">
+        <ReactLoading type={"spin"} color={"green"} height={200} width={200}></ReactLoading>
+      </div>
     )
   }
 
-  if(isError) {
-    return (
-      <b>SERVER IS ERROR</b>
-    )
-  }
   return (
     <section className="vh-100" style={{ backgroundColor: "#ffdfd3" }}>
       <div className="container py-5 h-100">
@@ -75,7 +79,7 @@ const Login = () => {
                           name="email"
                           {...register("email")} 
                         />
-                        <p>{errors.email?.message}</p>
+                        <p style={{color:"red"}}>{errors.email?.message}</p>
                       </div>
                       <div className="form-outline mb-4">
                         <input
@@ -86,7 +90,7 @@ const Login = () => {
                           name="password"
                           {...register("password")}
                         />
-                        <p>{errors.password?.message}</p>
+                        <p style={{color:"red"}}>{errors.password?.message}</p>
                       </div>
                       <div className="pt-1 mb-4">
                         <button
