@@ -1,24 +1,30 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../Services/axiosInterceptor";
+import {useForm} from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { useMutation } from "react-query";
+import ReactLoading from "react-loading"
+import * as yup from "yup"
+
 const Home = () => {
   const navigate = useNavigate();
   const name = localStorage.getItem("name");
   const token = localStorage.getItem("token");
-  const [input, setInput] = useState({
-    newpassword: "",
-    confirmpassword: "",
-  });
-
+  const schema=yup.object({
+    newpassword:yup.string().required("Password is required").matches(/^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/,
+    "Password must contain at least 8 characters, one uppercase, one number and one special case character"),
+    confirmpassword:yup.string().required("Confirm password is required").oneOf([yup.ref('newpassword'),null],"Password must match")
+  })
+  const {register,handleSubmit,formState:{errors}}=useForm({resolver:yupResolver(schema)})
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
     navigate("/login");
   };
 
-  const handleChangePassword = async(e) => {
-    e.preventDefault();
-    const response = await axios.post("api/auth/change-password", input, {
+  const handleChangePassword = async(data) => {
+    const response = await axios.post("api/auth/change-password", data, {
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -28,6 +34,14 @@ const Home = () => {
       handleLogout();
     }
   };
+  const {mutate,isLoading,isError} =useMutation(handleChangePassword)
+  if(isLoading) {
+    return (
+      <div className="position-absolute top-50 start-50 translate-middle">
+        <ReactLoading type={"spin"} color={"green"} height={200} width={200}></ReactLoading>
+      </div>
+    )
+  }
 
   return (
     <section className="vh-100" style={{ backgroundColor: "#B9D6F3" }}>
@@ -47,12 +61,12 @@ const Home = () => {
                 <div className="col-md-6 col-lg-7 d-flex align-items-center">
                   <div className="card-body p-4 p-lg-5 text-black">
                     <h1 className="h1 text-center">Home Page</h1>
-                    <form onSubmit={handleChangePassword}>
+                    <form onSubmit={handleSubmit(mutate)}>
                       <div className="d-flex align-items-center mb-3 pb-1">
                         <h2>Welcome</h2>
                         <span className="h3 fw-bold mb-0 mx-3">{name}</span>
                         <button
-                          onClick={handleLogout}
+                          onClick={handleSubmit(handleLogout)}
                           className="btn btn-primary"
                         >
                           Logout
@@ -72,15 +86,11 @@ const Home = () => {
                           name="newpassword"
                           type="password"
                           className="form-control form-control-lg"
-                          value={input.newpassword}
-                          onChange={(e) =>
-                            setInput({
-                              ...input,
-                              [e.target.name]: e.target.value,
-                            })
-                          }
+                          {...register("newpassword")}
                         />
                       </div>
+                      <p style={{color:"red"}}>{errors.newpassword?.message}</p>
+
 
                       <div className="form-outline mb-4">
                         <input
@@ -88,15 +98,11 @@ const Home = () => {
                           type="password"
                           name="confirmpassword"
                           className="form-control form-control-lg"
-                          value={input.confirmpassword}
-                          onChange={(e) =>
-                            setInput({
-                              ...input,
-                              [e.target.name]: e.target.value,
-                            })
-                          }
+                          {...register("confirmpassword")}
                         />
                       </div>
+                      <p style={{color:"red"}}>{errors.confirmpassword?.message}</p>
+
 
                       <div className="pt-1 mb-4">
                         <button
