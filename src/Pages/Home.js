@@ -66,7 +66,7 @@ const Home = () => {
                         <h2>Welcome</h2>
                         <span className="h3 fw-bold mb-0 mx-3">{name}</span>
                         <button
-                          onClick={handleSubmit(handleLogout)}
+                          onClick={handleLogout}
                           className="btn btn-primary"
                         >
                           Logout
